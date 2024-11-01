@@ -1,5 +1,6 @@
 import dotenv from 'dotenv'
 import connectDB from "./db/index.js";
+import { app } from './App.js';
 
 
 dotenv.config({
@@ -9,6 +10,14 @@ dotenv.config({
 
 
 connectDB()
+.then(()=>{
+   app.listen(process.env.PORT || 8000, ()=>{
+    console.log("Server started at ", process.env.PORT)
+   })
+})
+.catch((err)=>{
+    console.log("Mongo DB connection failed : ",err)
+})
 
 // import express from 'express'
 
