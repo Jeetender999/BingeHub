@@ -21,21 +21,31 @@ const registerUser = asyncHandler(async (req,res)=>{
     }
 
 
-   const existedUser = User.findOne({
+   const existedUser = await User.findOne({
         $or : [{username},{email}]
     })
 
-    console.log(existedUser)
+    console.log("user detail", existedUser)
 
     // Showing error need to check this error
 
-    // if(existedUser)
-    // {
-    //     throw new ApiError(409,"User with email or username already exist")
-    // }
+    if(existedUser)
+    {
+        throw new ApiError(409,"User with email or username already exist")
+    }
+
+    console.log("File detail", req.files)
 
     const avatarLocalPath = req.files?.avatar[0]?.path;
-    const coverImageLocalPath = req.files?.coverImage[0]?.path;
+
+
+    let coverImageLocalPath
+
+    if(req.files && Array.isArray(req.files.coverImage) && req.files.coverImage.length >0){
+        coverImageLocalPath = req.files.coverImage[0].path
+    }
+
+    console.log(avatarLocalPath, coverImageLocalPath)
 
     if(!avatarLocalPath){
         throw new ApiError("409", "Avatar image is requireds")
@@ -55,10 +65,10 @@ const registerUser = asyncHandler(async (req,res)=>{
         coverImage : coverImage?.url || "",
         email,
         password,
-        username : username.toLowerCase()
+        username : username?.toLowerCase()
     })
 
-   const createdUser = User.findById(user._id).select("-password -refreshToken")
+   const createdUser = await User.findById(user._id).select("-password -refreshToken")
 
     if(!createdUser)
     {
